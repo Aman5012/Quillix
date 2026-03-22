@@ -54,4 +54,52 @@ router.post('/comment/:blogId', async (req, res) => {
     return res.redirect(`/blog/${req.params.blogId}`);
 });
 
+router.get('/edit/:id', async (req, res) => {
+    try {
+        const blog = await Blog.findById(req.params.id);
+        if (!blog || blog.createdBy.toString() !== req.user._id.toString()) {
+            return res.redirect("/");
+        }
+        return res.render("editBlog", { user: req.user, blog });
+    } catch (error) {
+        return res.redirect("/");
+    }
+});
+
+router.post('/edit/:id', upload.single("coverImage"), async (req, res) => {
+    try {
+        const blog = await Blog.findById(req.params.id);
+        if (!blog || blog.createdBy.toString() !== req.user._id.toString()) {
+            return res.redirect("/");
+        }
+
+        const updateData = {
+            title: req.body.title,
+            body: req.body.body,
+        };
+
+        if (req.file) {
+            updateData.coverImageURL = `/uploads/${req.file.filename}`;
+        }
+
+        await Blog.findByIdAndUpdate(req.params.id, updateData);
+        return res.redirect(`/blog/${blog._id}`);
+    } catch (error) {
+        return res.redirect("/");
+    }
+});
+
+router.post('/delete/:id', async (req, res) => {
+    try {
+        const blog = await Blog.findById(req.params.id);
+        if (blog && blog.createdBy.toString() === req.user._id.toString()) {
+            await Blog.findByIdAndDelete(req.params.id);
+            await Comment.deleteMany({ blogId: req.params.id }); 
+        }
+    } catch (error) {
+        console.error("Deletion error:", error);
+    }
+    return res.redirect("/");
+});
+
 module.exports = router;

@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <%- include('./partials/head') %>
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+    <title>Edit Blog | Quillix</title>
+</head>
+
+<body class="bg-light">
+    <%- include('./partials/nav') %>
+
+        <div class="container mt-4 mb-5 max-w-lg">
+            <div class="card shadow-sm border-0 rounded-4">
+                <div class="card-body p-4">
+                    <h2 class="mb-4 fw-bold">Edit Your Post</h2>
+                    <form action="/blog/edit/<%= blog._id %>" method="post" enctype="multipart/form-data">
+                        
+                        <div class="mb-3 text-center">
+                            <label class="form-label text-muted d-block">Current Cover Image</label>
+                            <img src="<%= blog.coverImageURL %>" class="img-fluid rounded shadow-sm" style="max-height: 200px;" alt="Current Cover">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="coverImage" class="form-label fw-bold">Upload New Cover Image <small class="text-muted fw-normal">(Leave empty to keep current image)</small></label>
+                            <input type="file" class="form-control" id="coverImage" name="coverImage" aria-describedby="coverImage">
+                        </div>
+                        <div class="mb-3">
+                            <label for="title" class="form-label fw-bold">Title</label>
+                            <input type="text" class="form-control" id="title" name="title" value="<%= blog.title %>" required>
+                        </div>
+                        <div class="mb-4">
+                            <label for="body" class="form-label fw-bold">Body</label>
+                            <input type="hidden" name="body" id="body">
+                            <!-- Quill Editor Container pre-filled -->
+                            <div id="editor-container" class="bg-white" style="height: 350px;"><%- blog.body %></div>
+                        </div>
+                        <div class="d-grid mt-4">
+                            <button type="submit" class="btn btn-primary btn-lg rounded-pill shadow-sm">Save Changes</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <%- include('./partials/scripts') %>
+        <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+        <script>
+            var quill = new Quill('#editor-container', {
+                theme: 'snow',
+                placeholder: 'Write your amazing thoughts here...',
+                modules: {
+                    toolbar: [
+                        [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
+                        ['bold', 'italic', 'underline', 'strike'],
+                        ['blockquote', 'code-block'],
+                        [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                        ['link', 'image'],
+                        ['clean'] 
+                    ]
+                }
+            });
+
+            var form = document.querySelector('form');
+            form.onsubmit = function() {
+                var bodyInput = document.querySelector('input[name=body]');
+                bodyInput.value = quill.root.innerHTML;
+            };
+        </script>
+</body>
+
+</html>
